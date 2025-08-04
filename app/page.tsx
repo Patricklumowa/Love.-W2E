@@ -280,10 +280,9 @@ export default function LyricAnimationPage() {
           className="mt-12 text-center text-gray-600 max-w-2xl"
         >
           <p className="text-lg">
-            Click the "Lost?" button to start the animated lyric experience. The typography will animate in sync with
-            the music, transitioning seamlessly between different lyric groups.
+            balls
           </p>
-          <p className="text-sm mt-4 text-gray-400">Make sure to place your 'love.mp3' file in the public directory.</p>
+          <p className="text-sm mt-4 text-gray-400">Patrick.</p>
         </motion.div>
       )}
     </div>
