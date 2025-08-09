@@ -230,7 +230,7 @@ export default function LyricAnimationPage() {
   const [musicProgress, setMusicProgress] = useState(241) // Start at 4:01 (241 detik)
   const [isProgressRunning, setIsProgressRunning] = useState(false)
 
-  // Auto-scroll to bottom when new messages are added
+  // Auto-scroll di UI chat
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
       chatMessagesRef.current.scrollTo({
@@ -239,11 +239,9 @@ export default function LyricAnimationPage() {
       })
     }
   }
-
-  // Scroll to bottom whenever sentMessages changes
   useEffect(() => {
     if (sentMessages.length > 0) {
-      // Small delay to ensure the message is rendered before scrolling
+      // delay sblum autoscroll
       setTimeout(scrollToBottom, 100)
     }
   }, [sentMessages])
@@ -265,14 +263,12 @@ export default function LyricAnimationPage() {
     }
   }, [isProgressRunning, currentGroup])
 
-  // Format seconds to MM:SS
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
-  // Play sound function
   const playSound = (soundFile: string) => {
     if (!soundRefs.current[soundFile]) {
       soundRefs.current[soundFile] = new Audio(`/${soundFile}`)
@@ -293,40 +289,33 @@ export default function LyricAnimationPage() {
       audioRef.current.play()
       setIsPlaying(true)
 
-      // Clear any existing timeouts
       timeoutRefs.current.forEach((timeout) => clearTimeout(timeout))
       timeoutRefs.current = []
 
-      // Schedule each lyric group
       lyricGroups.forEach((group, groupIndex) => {
         const groupTimeout = setTimeout(() => {
           setCurrentGroup(group.id)
           setCurrentLyricIndex(-1)
 
-          // When starting groupB, add groupA messages as chat history
           if (group.id === "groupB") {
             const groupAMessages = lyricGroups.find((g) => g.id === "groupA")?.lyrics || []
             setSentMessages(groupAMessages)
           }
 
-          // Schedule each individual lyric in this group
           group.lyrics.forEach((lyric, lyricIndex) => {
             const lyricTimeout = setTimeout(() => {
               setCurrentLyricIndex(lyricIndex)
 
-              // Play sound if available
               if (lyric.sound) {
                 playSound(lyric.sound)
               }
 
               if (group.id === "groupB") {
                 if (lyric.sender === "user") {
-                  // Start typing in input for user messages
                   setCurrentTypingMessage(lyric)
                   setIsTypingInInput(true)
                   setCurrentInputText("")
                 } else {
-                  // For kaguya messages, add directly to sent messages
                   setSentMessages((prev) => [...prev, lyric])
                 }
               }
@@ -334,10 +323,9 @@ export default function LyricAnimationPage() {
 
             timeoutRefs.current.push(lyricTimeout)
 
-            // Hide lyric after its duration
             const hideLyricTimeout = setTimeout(() => {
               if (group.id === "groupB" && lyric.sender === "user") {
-                // Move user message from input to chat after typing completes
+                // Mindahin Chat user dari input ke chat
                 setIsTypingInInput(false)
                 setCurrentInputText("")
                 setCurrentTypingMessage(null)
@@ -348,10 +336,8 @@ export default function LyricAnimationPage() {
             timeoutRefs.current.push(hideLyricTimeout)
           })
 
-          // Clear current group after total duration
           const clearGroupTimeout = setTimeout(() => {
             if (groupIndex === lyricGroups.length - 1) {
-              // Last group finished
               setCurrentGroup(null)
               setIsPlaying(false)
               setSentMessages([])
@@ -360,7 +346,6 @@ export default function LyricAnimationPage() {
 
           timeoutRefs.current.push(clearGroupTimeout)
 
-          // Start music progress for group C
           if (group.id === "groupC") {
             const startProgressTimeout = setTimeout(() => {
               setIsProgressRunning(true)
@@ -381,7 +366,7 @@ export default function LyricAnimationPage() {
       audioRef.current.currentTime = 0
     }
 
-    // Stop all sound effects
+   
     Object.values(soundRefs.current).forEach((audio) => {
       audio.pause()
       audio.currentTime = 0
@@ -395,7 +380,6 @@ export default function LyricAnimationPage() {
     setIsTypingInInput(false)
     setCurrentTypingMessage(null)
 
-    // Clear all timeouts
     timeoutRefs.current.forEach((timeout) => clearTimeout(timeout))
     timeoutRefs.current = []
 
@@ -405,9 +389,7 @@ export default function LyricAnimationPage() {
 
   useEffect(() => {
     return () => {
-      // Cleanup timeouts on unmount
       timeoutRefs.current.forEach((timeout) => clearTimeout(timeout))
-      // Cleanup audio elements
       Object.values(soundRefs.current).forEach((audio) => {
         audio.pause()
       })
@@ -417,7 +399,7 @@ export default function LyricAnimationPage() {
   const currentGroupData = lyricGroups.find((group) => group.id === currentGroup)
   const currentLyric = currentGroupData && currentLyricIndex >= 0 ? currentGroupData.lyrics[currentLyricIndex] : null
 
-  // Handle input typing completion
+
   const handleInputTypingComplete = () => {
     if (currentTypingMessage) {
       setSentMessages((prev) => [...prev, currentTypingMessage])
@@ -471,9 +453,9 @@ export default function LyricAnimationPage() {
               transition={{ duration: 0.8, ease: "easeInOut" }}
               className="relative flex flex-col items-center justify-center min-h-[700px]"
             >
-              {/* Background Images Section - Upper part */}
+              {/* Background Images Section */}
               <div className="relative flex items-center justify-center mb-8">
-                {/* First background image - tied to first lyric of group A */}
+                {/* First background image - di grup A */}
                 {currentGroup === "groupA" && (
                   <>
                     <motion.div
@@ -486,7 +468,7 @@ export default function LyricAnimationPage() {
                       <Image src="/1g1.png" alt="First background" width={720} height={580} className="rounded-lg" />
                     </motion.div>
 
-                    {/* Second background image - tied to second lyric of group A */}
+                    {/* Second background image - di grup A */}
                     {currentLyricIndex >= 0 && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -498,7 +480,7 @@ export default function LyricAnimationPage() {
                       </motion.div>
                     )}
 
-                    {/* Third lyric images - tied to third lyric of group A */}
+                    {/* Third lyric images - di grup A */}
                     {currentLyricIndex >= 1 && (
                       <>
                         {/* Left image - 170x284 */}
@@ -545,7 +527,7 @@ export default function LyricAnimationPage() {
                   </>
                 )}
 
-                {/* Spotify-like Music Player - appears only during third group (groupC) */}
+                {/* Spotify-like Music Player - (groupC) */}
                 {currentGroup === "groupC" && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -719,7 +701,7 @@ export default function LyricAnimationPage() {
                   </motion.div>
                 )}
 
-                {/* Chat Interface - appears only during second group (groupB) */}
+                {/* Chat Interface -(groupB) */}
                 {currentGroup === "groupB" && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -729,7 +711,7 @@ export default function LyricAnimationPage() {
                     className="relative z-25 mx-auto"
                     style={{ width: "375px" }}
                   >
-                    {/* Chat App Container with iPhone-like aspect ratio */}
+                    {/* Chat App Container pake iPhone-like aspect ratio */}
                     <div
                       className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200"
                       style={{
@@ -791,12 +773,12 @@ export default function LyricAnimationPage() {
                         className="bg-gray-50 p-6 space-y-4 overflow-y-auto"
                         style={{
                           height: "620px",
-                          scrollbarWidth: "none" /* Firefox */,
-                          msOverflowStyle: "none" /* Internet Explorer 10+ */,
+                          scrollbarWidth: "none" ,
+                          msOverflowStyle: "none" ,
                         }}
                         css={{
                           "&::-webkit-scrollbar": {
-                            display: "none" /* Safari and Chrome */,
+                            display: "none" ,
                           },
                         }}
                       >
@@ -867,7 +849,7 @@ export default function LyricAnimationPage() {
                           ))}
                         </AnimatePresence>
 
-                        {/* Typing Indicator for Kaguya */}
+                        {/* Typing Indicator buat Kaguya */}
                         {currentLyric &&
                           currentLyric.sender === "kaguya" &&
                           currentLyricIndex >= 0 &&
